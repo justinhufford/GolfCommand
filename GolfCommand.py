@@ -115,7 +115,7 @@ class Golfer:
 
 golfer = Golfer(Club('normal golf club', 0, 0, 0, 0), Ball('normal golf ball', 0, 0, 0, 0), strength, accuracy)
 
-def chat_with_gpt(client, messages, model="gpt-4-1106-preview"):
+def chat_with_gpt(client, messages, model="gpt-3.5-turbo-1106", stream=False):
     """
 Model:                  Input Cost:         Output Cost:         
 gpt-4-1106-preview      $0.010 / 1K tokens	$0.030 / 1K tokens
@@ -126,26 +126,40 @@ gpt-3.5-turbo-1106      $0.001 / 1K tokens	$0.002 / 1K tokens
         response = client.chat.completions.create(
             model=model,
             messages=messages,
+            stream=stream
         )
-        return response.choices[0].message.content.strip()
+        if stream:
+            return map(map_chunks, response)
+        else:
+            return response.choices[0].message.content.strip()
     except Exception as e:
         return str(e)
     
-
+def map_chunks(chunk):
+    return chunk.choices[0].delta.content
 
 def print_with_typing_effect(text, speed=typing_speed):
-    wrapped_text = textwrap.fill(text, term.width, replace_whitespace = False)
-    for char in wrapped_text:
+    for char in text:
         sys.stdout.write(char)
         sys.stdout.flush()  # Ensure each character is flushed immediately
         time.sleep(speed)  # Wait a bit before printing the next character
+    print()  # Move to the next line after the sentence is complete
+
+def print_stream_with_typing_effect(chunks, speed=typing_speed, prefix=""):
+    sys.stdout.write(prefix)
+    sys.stdout.flush()
+    for chunk in chunks:
+        for char in chunk:
+            sys.stdout.write(char)
+            sys.stdout.flush()  # Ensure each character is flushed immediately
+            time.sleep(speed)  # Wait a bit before printing the next character
     print()  # Move to the next line after the sentence is complete
 
 
 def input_with_typing_effect(prompt, speed=typing_speed):
 # Applies the typing effect to input messages.
     print_with_typing_effect(prompt, speed=speed)
-    return input(us )# Adds the user symbol at the start of the input line
+    return input(us)# Adds the user symbol at the start of the input line
 
 
 
@@ -314,7 +328,8 @@ def main():
                 print()
                 print_with_typing_effect(ai + f"{golfer.ball.name} condition: {golfer.ball.condition * 100:.2f}%")# TODO: Have ChatGPT rewrite to fix any grammar issues.
                 print()
-                print_with_typing_effect(ai + response_conversation_swing)# ChatGPT's naration
+
+                print_stream_with_typing_effect(response_conversation_swing, prefix=ai)
                 print()
                 print_with_typing_effect(ai + f"Distance to hole: {hole_distance:2f} yards")
 
