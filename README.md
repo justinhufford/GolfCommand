@@ -11,6 +11,8 @@
 
  The hole is 347 yards away. Good luck!
 
+
+
  What would you like to use as your golf ball?
 
  GOLF BALL: an immovable object
@@ -18,6 +20,8 @@
  Mass:      inf lbs
  Condition: 100.00%
  Decay:     0.00%
+
+
 
  What would you like to use as your golf club?
 
@@ -27,7 +31,9 @@
  Condition: 100.00%
  Decay:     0.00%
 
- swinging guitar...
+
+
+ swinging an unstoppable force...
 
             BANG!
 
