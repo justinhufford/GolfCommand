@@ -5,8 +5,35 @@
  ▀▄▄█ ▀▀▀ ▀ █  ▀▄▄▀ ▀▀▀ ▀ ▀ ▀ ▀ ▀ ▀ ▀▀▀ ▀ ▀ ▀▀▀
  ▄  █       █        ᴅᴇsɪɢɴᴇᴅ ʙʏ ȷᴜsᴛɪɴ ʜᴜғғᴏʀᴅ
   ▀▀                                           
-The world's most advanced text-based golf simulator!
+ The world's most advanced text-based golf simulator!
+
+
+
+ The hole is 347 yards away. Good luck!
+
+ What would you like to use as your golf ball?
+
+ GOLF BALL: an immovable object
+ Potential: 0.00%
+ Mass:      inf lbs
+ Condition: 100.00%
+ Decay:     0.00%
+
+ What would you like to use as your golf club?
+
+ GOLF CLUB:  an unstoppable force
+ Potential: inf%
+ Mass:      inf lbs
+ Condition: 100.00%
+ Decay:     0.00%
+
+ swinging guitar...
+
+            BANG!
+
+ Calculating cheeseburger trajectory...
+
+ You hit an immovable object with an unstoppable force!
+ It traveled nan yards!
 
 ```
-
-Welcome to **GolfCommand**, the world's most advanced text-based golfing simulator. This project is a blend of my passion for programming and graphic design, creatively tailored to run on the command-line interface, specifically optimized for Windows 10 Command Prompt. It's more than just a game; it's an exploratory journey into Python programming, where I experiment with creating a rich, responsive interface design and integrate ChatGPT as a game narrator and an aid in user-input interpretation.
