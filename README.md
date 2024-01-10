@@ -37,7 +37,7 @@
 
             BANG!
 
- Calculating cheeseburger trajectory...
+ Calculating trajectory...
 
  You hit an immovable object with an unstoppable force!
  It traveled nan yards!
