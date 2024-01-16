@@ -18,6 +18,7 @@ import math# for mathing,
 import random# to mix things up
 import textwrap# for better text rendering,
 from openai import OpenAI# for AI magic
+import os
 
 #𝗖𝗢𝗡𝗦𝗧𝗔𝗡𝗧𝗦
 term = Terminal()
@@ -40,6 +41,7 @@ condition_threshold = 0.2 # ball and club will break if condition falls below th
 ai = (" ")# Game narration
 us = (" ")# User input
 er = (" ")# Error message
+
 
 
 #This is the prompt sent to ChatGPT that allows it to return numeric values for the calculate_swing_distance formula:
@@ -90,29 +92,61 @@ A number from 0 to 100 describing how fragile the object is. This number will mo
 
 
 
-class GameObject:
-    def __init__(self, name: str, potential: float, mass: float, condition: float, decay: float):
+class Item:             
+#   ┆                
+#   ┆      
+    def __init__(self, name: str, qty: float, type: str, bio: str, potential: float, mass: float, condition: float, decay: float):
         self.name = name
+        self.qty = qty
+        self.type = type
+        self.bio = bio 
         self.potential = potential
         self.mass = mass
         self.condition = condition
         self.decay = decay
-
-class Club(GameObject):
-    pass
-
-class Ball(GameObject):
-    pass
+        
 
 class Golfer:
-    def __init__(self, club: Club, ball: Ball, strength: float, accuracy: float):
+    def __init__(self, club: Item, ball: Item, accessory: Item, strength: float, accuracy: float):
         self.club = club
         self.ball = ball
+        self.accessory = accessory
         self.strength = strength
         self.accuracy = accuracy
+        self.inventory = [club, ball, accessory]
 
 
-golfer = Golfer(Club('normal golf club', 0, 0, 0, 0), Ball('normal golf ball', 0, 0, 0, 0), strength, accuracy)
+default_club = Item("Driver", 
+    1, 
+    "Club", 
+    "Great for long shots, not so good for puttin'",
+    92,
+    1.5,
+    80,
+    0.2,
+)
+
+default_ball = Item("Golf Ball", 
+    10, 
+    "Ball", 
+    "A mystical orb with unknown powers.",
+    95,
+    0.1,
+    100,
+    0.2,
+)
+
+default_accessory = Item("Lucky Hat", 
+    1, 
+    "Accessory", 
+    "You swear you swing better when you wear this hat...",
+    5,
+    0.2,
+    71,
+    20,
+)
+
+golfer = Golfer(default_club, default_ball, default_accessory, strength, accuracy)
 
 def chat_with_gpt(client, messages, model="gpt-4-1106-preview", stream=False):
     """
@@ -159,11 +193,63 @@ def input_with_typing_effect(prompt, speed=typing_speed):
     print_with_typing_effect(prompt, speed=speed)
     return input(us)# Adds the user symbol at the start of the input line
 
-
+def clear():
+    os.system('cls' if os.name == 'nt' else 'clear')
+    pass
 
 """
 GAMEPLAY
 """
+
+def choose_club():
+    while True:
+        print('CHOOSE CLUB:')
+        for index, item in enumerate(golfer.inventory):
+            print(f'[{index + 1}] {item.name}')
+        print('[0] NEW CLUB')
+        choice = int(input())
+        
+        try:
+            if choice == 0 or '':
+                build_club()
+                golfer.inventory.append(golfer.club)
+            else:
+                golfer.club = golfer.inventory[choice - 1]
+
+            return
+
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+            
+        except IndexError:
+            print("Invalid number. Please enter a number from the list.")
+        except Exception as e:
+            print(f"Problem in selecting item from inventory: {e}")
+
+def choose_ball():
+    while True:
+        print('CHOOSE BALL:')
+        for index, item in enumerate(golfer.inventory):
+            print(f'[{index + 1}] {item.name}')
+        print('[0] NEW BALL')
+        choice = int(input())
+        
+        try:
+            if choice == 0 or '':
+                build_ball()
+                golfer.inventory.append(golfer.ball)
+            else:
+                golfer.ball = golfer.inventory[choice - 1]
+            return
+
+        except ValueError:
+            print("Invalid input. Please enter a number.")
+            
+        except IndexError:
+            print("Invalid number. Please enter a number from the list.")
+        except Exception as e:
+            print(f"Problem in selecting item from inventory: {e}")
+
 #CLUB
 def build_club():
     #1.1 The player chooses an object to use as a club:
@@ -346,10 +432,12 @@ def main():
                 if golfer.ball.condition <= condition_threshold:
                     print()
                     print_with_typing_effect(ai + f"The {golfer.ball.name} is no longer usable.")# TODO: Have ChatGPT rewrite to fix any grammar issues.
-                    build_ball()
+                    golfer.inventory.remove(golfer.ball)
+                    choose_ball()
 
                 # Ask if the player wants to swing again
                 while True:
+                    print()
                     next_turn = input_with_typing_effect(ai +
                         "[1] Swing Again\n" +
                         "[2] Change Club\n" +
@@ -358,9 +446,11 @@ def main():
                     if next_turn == "1":
                         break
                     elif next_turn == "2":
-                        build_club()
+                        print()
+                        choose_club()
                     elif next_turn == "3":
-                        build_ball()
+                        print()
+                        choose_ball()
 
 
 
