@@ -12,13 +12,13 @@ GolfCommand = """
 #𝗜𝗠𝗣𝗢𝗥𝗧𝗦
 import sys# for system-specific parameters and functions,
 from rich.console import Console# for UI layout
-from blessed import Terminal# To get access to terminal functionality,
+from blessed import Terminal# to get access to terminal functionality,
 import time# for sleep functionality,
 import math# for mathing,
-import random# to mix things up
+import random# to mix things up,
 import textwrap# for better text rendering,
-from openai import OpenAI# for AI magic
-import os
+from openai import OpenAI# to bring everything to life,
+import os# to read API keys
 
 #𝗖𝗢𝗡𝗦𝗧𝗔𝗡𝗧𝗦
 term = Terminal()
@@ -32,19 +32,20 @@ strength = 0.8
 accuracy = 0.8
 swing_power = 1.0 
 
-generate_hole_distance = random.randint(300, 550)# Randomly assign a starting distance to the hole
-win_tolerance = 10  # will win if ball is within 10 yards of hole
-condition_threshold = 0.2 # ball and club will break if condition falls below this number
+generate_hole_distance = random.randint(300, 550)# Randomly assign a starting distance to the hole {generate_hole_distance} yards away
+win_tolerance = 10# player will win if ball is within {win_tolerance} yards of hole
+condition_threshold = 0.2# ball and club will break if condition falls below {condition_threshold}
 
 #UI symbols to visually identify message roles
+#(leave blank for no symbol)
 ai = (" ")# Game narration
 us = (" ")# User input
 er = (" ")# Error message
 
 
 
-#This is the prompt sent to ChatGPT that allows it to return numeric values for the calculate_swing_distance formula:
-#Later versions of the game may use a fine-tuned 3.5 model instead to reduce API costs.
+#This is the prompt sent to ChatGPT that allows it to return numeric values for the `calculate_swing_distance()`` formula:
+#Later versions of the game may use a fine-tuned model instead to reduce API costs.
 build_object = """
 Potential:
 The potential is a number between 0 and 100 that we can use in an equation to calculate the distance a ball hit with any object will travel.  Consider the material of the object, and how likely it is to transfer its energy and momentum to the ball when hit, or how likely energy will transfer from the club to the object. Objects with a high Coefficient of restitution, (or lower impact absorption) will have a high potential. 
@@ -89,6 +90,28 @@ A number from 0 to 100 describing how fragile the object is. This number will mo
 |the sun|1000000000|4,400,000,000,000,000,000,000,000,000|0.8|0.1|
 """
 
+class Inventory:
+    def __init__(self):
+        self.items = []
+
+    def add_item(self, item):
+        self.items.append(item)
+
+    def list_items(self):
+        return self.items
+
+    def remove_item(self, item):
+        if item in self.items:
+            self.items.remove(item)
+
+    def get_item(self, index):
+        if 0 <= index < len(self.items):
+            return self.items[index]
+        return None
+
+    def display(self):
+        for index, item in enumerate(self.items):
+            print(f'[{index + 1}] {item.name}')
 
 
 class Item:             
@@ -112,7 +135,11 @@ class Golfer:
         self.accessory = accessory
         self.strength = strength
         self.accuracy = accuracy
-        self.inventory = [club, ball, accessory]
+        self.inventory = Inventory()
+        self.inventory.add_item(club)
+        self.inventory.add_item(ball)
+        self.inventory.add_item(accessory)
+
 
 
 default_club = Item(
@@ -230,17 +257,17 @@ GAMEPLAY
 def choose_club():
     while True:
         print('CHOOSE CLUB:')
-        for index, item in enumerate(golfer.inventory):
-            print(f'[{index + 1}] {item.name}')
+        golfer.inventory.display()
         print('[0] NEW CLUB')
         choice = int(input())
-        
+
         try:
             if choice == 0 or '':
-                build_club()
-                golfer.inventory.append(golfer.club)
+                CREATE_item("club")
             else:
-                golfer.club = golfer.inventory[choice - 1]
+                selected_item = golfer.inventory.get_item(choice - 1)
+                if selected_item and selected_item.type == "Club":
+                    golfer.club = selected_item
 
             return
 
@@ -255,17 +282,18 @@ def choose_club():
 def choose_ball():
     while True:
         print('CHOOSE BALL:')
-        for index, item in enumerate(golfer.inventory):
-            print(f'[{index + 1}] {item.name}')
+        golfer.inventory.display()
         print('[0] NEW BALL')
         choice = int(input())
-        
+
         try:
             if choice == 0 or '':
-                build_ball()
-                golfer.inventory.append(golfer.ball)
+                CREATE_item("ball")
             else:
-                golfer.ball = golfer.inventory[choice - 1]
+                selected_item = golfer.inventory.get_item(choice - 1)
+                if selected_item and selected_item.type == "Ball":
+                    golfer.ball = selected_item
+
             return
 
         except ValueError:
@@ -276,72 +304,51 @@ def choose_ball():
         except Exception as e:
             print(f"Problem in selecting item from inventory: {e}")
 
-#CLUB
-def build_club():
-    #1.1 The player chooses an object to use as a club:
-    print()
-    print_with_typing_effect(term.yellow(ai + "What would you like to use as your golf club? "))
-    print()
-    golfer.club.name = input(us + term.yellow("GOLF CLUB:  "))
 
-    #1.2 ChatGPT generates the club's values for physics calculations:
-    build_club = [
-        {"role": "user", "content": build_object + f"Please estimate the potential, mass, condition, and decay values for this object: {golfer.club.name}. Please output your response as a comma-separated list, with no other comment, narration, or explanation. Always provide some values, even if you don't know, just make something up. What are the values of {golfer.club.name}?"},
-    ]#  ˄ Send ChatGPT detailed club build instructions
-    response_build_club = chat_with_gpt(client, build_club)# ChatGPT's Response
-    response_values = response_build_club.split(",")# I think this separates the values generated by ChatGPT into a format the program can use?
 
-    if len(response_values) != 4:# If ChatGPT does not return 4 values,
-        print_with_typing_effect(term.red(er + f"Error building {golfer.club.name}, please try again or choose a different club."))# display an error message.
+
+def CREATE_item(item_type):
+    # Prompt user for item name
+    print()
+    print_with_typing_effect(term.yellow(ai + f"What would you like to use as your golf {item_type}? "))
+    print()
+    item_name = input(us + term.yellow(f"GOLF {item_type.upper()}:  "))
+
+    # ChatGPT generates the item's values for physics calculations
+    build_item = [
+        {"role": "user", "content": build_object + f"Please estimate the potential, mass, condition, and decay values for this object: {item_name}. Please output your response as a comma-separated list, with no other comment, narration, or explanation. Always provide some values, even if you don't know, just make something up. What are the values of {item_name}?"},
+    ]
+    response_build_item = chat_with_gpt(client, build_item)
+    response_values = response_build_item.split(",")
+
+    if len(response_values) != 4:
+        print_with_typing_effect(term.red(er + f"Error building {item_name}, please try again or choose a different {item_type}."))
         return False
 
-    golfer.club.potential = float(response_values[0]) / 100
-    golfer.club.mass = float(response_values[1]) * 10
-    golfer.club.condition = float(response_values[2])
-    golfer.club.decay = float(response_values[3]) / 100
+    potential = float(response_values[0]) / 100
+    mass = float(response_values[1]) * 10
+    condition = float(response_values[2])
+    decay = float(response_values[3]) / 100
 
+    new_item = Item(item_name, 1, item_type.capitalize(), f"Custom {item_type}", potential, mass, condition, decay)
     
-    #1.3 Display the club's stats:
-    print_with_typing_effect(term.yellow(f" Potential: " + term.white(f"{golfer.club.potential * 100:.2f}%")))
-    print_with_typing_effect(term.yellow(f" Mass:      " + term.white(f"{golfer.club.mass / 10} lbs")))
-    print_with_typing_effect(term.yellow(f" Condition: " + term.white(f"{golfer.club.condition * 100:.2f}%")))
-    print_with_typing_effect(term.yellow(f" Decay:     " + term.white(f"{golfer.club.decay * 100:.2f}%")))
+    golfer.inventory.add_item(new_item)
 
+    if item_type == "club":
+        golfer.club = new_item
+    elif item_type == "ball":
+        golfer.ball = new_item
+
+    display_item_stats(new_item)
     return True
 
 
+def display_item_stats(item):
+    print_with_typing_effect(term.yellow(f" Potential: " + term.white(f"{item.potential * 100:.2f}%")))
+    print_with_typing_effect(term.yellow(f" Mass:      " + term.white(f"{item.mass / 10} lbs")))
+    print_with_typing_effect(term.yellow(f" Condition: " + term.white(f"{item.condition * 100:.2f}%")))
+    print_with_typing_effect(term.yellow(f" Decay:     " + term.white(f"{item.decay * 100:.2f}%")))
 
-#Build Ball
-def build_ball():
-    #2.1 The player chooses an object to use as the ball:
-    print()
-    golfer.ball.name = print_with_typing_effect(term.yellow(ai + "What would you like to use as your golf ball? "))
-    print()
-    golfer.ball.name = input(us + term.yellow("GOLF BALL:  "))
-
-    #2.2 ChatGPT generates the ball's values for physics calculations:
-    build_ball = [
-        {"role": "user", "content": build_object + f"Please estimate the potential, mass, condition, and decay values for this object: {golfer.ball.name}. Please output your response as a comma-separated list, with no other comment, narration, or explanation. Always provide some values, even if you don't know, just make something up. What are the values of {golfer.ball.name}?"},
-    ]#  ˄ Send ChatGPT detailed ball build instructions
-    response_build_ball = chat_with_gpt(client, build_ball)# ChatGPT's Response
-    response_values = response_build_ball.split(",")# I think this separates the values generated by ChatGPT into a format the program can use?
-
-    if len(response_values) != 4:# If ChatGPT does not return 4 values,
-        print_with_typing_effect(term.red(er + f"Error building {golfer.ball.name}, please try again or choose a different ball."))# display an error message.
-        return False
-
-    golfer.ball.potential = float(response_values[0]) / 100
-    golfer.ball.mass = float(response_values[1]) * 10
-    golfer.ball.condition = float(response_values[2])
-    golfer.ball.decay = float(response_values[3]) / 100
-
-    
-    #2.3 Display the ball's stats:
-    print_with_typing_effect(term.yellow(f" Potential: " + term.white(f"{golfer.ball.potential * 100:.2f}%")))
-    print_with_typing_effect(term.yellow(f" Mass:      " + term.white(f"{golfer.ball.mass / 10} lbs")))
-    print_with_typing_effect(term.yellow(f" Condition: " + term.white(f"{golfer.ball.condition * 100:.2f}%")))
-    print_with_typing_effect(term.yellow(f" Decay:     " + term.white(f"{golfer.ball.decay * 100:.2f}%")))
-    return True
 
 
 
@@ -377,11 +384,11 @@ def main():
 
     while True:
         try:
-            success = build_ball()
+            success = CREATE_item("ball")
             if not success:
                 continue
 
-            success = build_club()
+            success = CREATE_item("club")
             if not success:
                 continue
 
@@ -502,12 +509,5 @@ if __name__ == "__main__":
 Special thanks to:
 - ChatGPT for writing most of the code for me.
 - Playtesters
-    - Josh Hufford
-    - Phillip Rose
-    - Drew "Muffins" Snyder
-    - Joe Hufford
-    - Mckenna Hufford
-    - Jill Hufford
-    - Drew
-    - Nick 
+- Players like YOU!
 """
