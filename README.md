@@ -2,9 +2,7 @@
   ▄▄      ▄     ▄▄                            █
  █  ▀     █ ▄▀ █  █                           █
  █ ▀█ █▀▄ █ █▀ █    █▀▄ █▀█▀▄ █▀█▀▄ ▄▀█ █▀▄ ▄▀█
- ▀▄▄█ ▀▀▀ ▀ █  ▀▄▄▀ ▀▀▀ ▀ ▀ ▀ ▀ ▀ ▀ ▀▀▀ ▀ ▀ ▀▀▀
- ▄  █       █        ᴅᴇsɪɢɴᴇᴅ ʙʏ ȷᴜsᴛɪɴ ʜᴜғғᴏʀᴅ
+ ▀▄▄█ ▀▀▀ ▀ █  ▀▄▄▀ ▀▀▀ ▀ ▀ ▀ ▀ ▀ ▀ ▀▀▀ ▀ ▀ ▀▀▀ 
+ ▄  █       █                            (beta)
   ▀▀                                           
  The world's most advanced text-based golf simulator!
-
-An experiment in AI function calling in gaming.
