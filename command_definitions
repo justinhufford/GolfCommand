@@ -1,0 +1,22 @@
+"""
+Command definitions for the chatbot, including command names, functions, and descriptions.
+"""
+commands = {
+    'RANDOM_NUMBER': {
+        'func': 'random_number',
+        'description': "Generate a random number between min and max. Example: `COMMAND: RANDOM_NUMBER; min=1; max=100`."
+    },
+    'QUIT': {
+        'func': 'quit',
+        'description': "Exits the program. NOTE: Only run with user permission or in case of emergency to force-quit the program."
+    },
+    'LIST_SOURCE_FILES': {
+        'func': 'list_source_files',
+        'description': "List all source files with their descriptions. Example: `COMMAND: LIST_SOURCE_FILES`."
+    },
+    'READ_SOURCE_FILE': {
+        'func': 'read_source_file',
+        'description': "Read the contents of a source file. Example: `COMMAND: READ_SOURCE_FILE; filename=chatbot.py`. NOTE: Expensive to run. Only run with user permission"
+    },
+    # Add more commands here as needed
+}
