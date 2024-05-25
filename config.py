@@ -48,7 +48,7 @@ class ColoredFormatter(logging.Formatter):
 # Configuration class to manage dynamic settings
 class Config:
     def __init__(self):
-        self.typing_speed = 0.02
+        self.typing_speed = 0.01
         self.model = DEFAULT_MODEL
         self.logging_enabled = False  # New attribute for logging state
         self.load()
