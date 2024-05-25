@@ -21,7 +21,7 @@ if not API_KEY:
             "API key not found. Please set the OPENAI_API_KEY environment variable or provide an OPENAI_API_KEY.txt file.")
 
 # Default model to use
-DEFAULT_MODEL = "gpt-3.5-turbo"
+DEFAULT_MODEL = "gpt-4o"
 
 # Configuration file path
 CONFIG_FILE_PATH = "config.json"
