@@ -8,7 +8,7 @@
  The world's most advanced text-based golf simulator!
 ```
 
-**GolfCommand: **
+**GolfCommand:**
 Welcome to GolfCommand! Ready to tee off and experience virtual golf like never before?
 `~PASS~`
 
