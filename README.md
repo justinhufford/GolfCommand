@@ -1,3 +1,4 @@
+```
   ▄▄      ▄     ▄▄                            █
  █  ▀     █ ▄▀ █  █                           █
  █ ▀█ █▀▄ █ █▀ █    █▀▄ █▀█▀▄ █▀█▀▄ ▄▀█ █▀▄ ▄▀█
@@ -5,7 +6,7 @@
  ▄  █       █                            (beta)
   ▀▀                                           
  The world's most advanced text-based golf simulator!
-
+```
 
 GolfCommand: Welcome to GolfCommand! You stand on the first tee of Greenbeard's Cove, a mysterious and enchanted golf course. Before you lies a picturesque but challenging par 4, with a narrow fairway lined with ancient, whispering trees. You take a deep breath, tap the ground with your driver, and prepare to take your first swing.
 What will you do?
