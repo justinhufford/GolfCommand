@@ -1,105 +1,76 @@
+README = """src.display
+User experience and interface design.
+"""
+# ------------------------------------------------------------------------------
+
 import os
-import platform
 import time
-import logging
-from scene import Scene
+import display
+import shutil
+import cursor
 
-# Set up logging at the top of the file
-logging.basicConfig(
-    level=logging.DEBUG,
-    format='%(levelname)s: %(message)s'
-)
-logger = logging.getLogger(__name__)
+# ------------------------------------------------------------------------------
 
-WIDTH = 80
-MARGIN = 4
-
-SLOW = 0.2
-FAST = 0.08
-TYPE = 0.02
+WIDTH = 36
 
 def clear():
-    """
-    Clears the terminal/console screen.
-    """
-    if platform.system() == "Windows":
-        os.system("cls")
-    else:
-        os.system("clear")
+    os.system('cls')
+
+cursor = cursor.cursor
+gutter = len(cursor) + 1
+
+def _body(content):
+    cols, rows = shutil.get_terminal_size()
+    margin = ( cols - len(content) // 2 )
+    for line in content.split("\n"):
+        print(" " * margin, end = "")
+        print(line)
 
 
-def print_body(content, typing=False):
-    print((" " * MARGIN), end="")
-    if typing:
-        for char in content:
-            print(char, end="", flush=True)
-            time.sleep(TYPE)
-        print()
-    else:
-        print(content)
 
-def top_bar(title):
-    INVERT = "\033[7m"
-    RESET = "\033[27m"
-    print(INVERT, end="")
-    print_body(title + (" " * (WIDTH - len(title))))
-    print(RESET)
+
+def draw(content):
+    lines = content.split("\n")
+    for line in lines:
+        print( (" " * gutter) + line )
+
+def draw_centered(content):
+    cols, rows = shutil.get_terminal_size()
+    lines = content.split("\n")
+    v_margin = (rows - len(lines)) // 2 # Terminal height - content height / 2 (rounded)
+
+    print("\n" * v_margin,  end = "")
+
+    for line in lines:
+        h_margin = (cols - len(line)) // 2
+        print(" " * h_margin, end = "")
+        print(line)
+
+    print("\n" * v_margin,  end = "")
+
+
+
+
+
+# ------------------------------------------------------------------------------
+
+def start():
+    turn = 0
     
-def typing(content):
-    for char in content:
-        print(char, end="", flush=True)
-        time.sleep(TYPE)
-    print()
+    while True:
+        turn += 1
+        display.clear()
 
-def logotype():
-    # Get the folder where this file (display.py) is located
-    current_folder = os.path.dirname(__file__)
-    logo_path = os.path.join(current_folder, 'logo.txt')
-    
-    with open(logo_path, 'r', encoding='utf-8') as logo:
-        logotype = logo.read()
-        for line in logotype.split("\n"):
-            print_body(line)
-    print()
+        draw(f"TURN: {turn}")
 
-def input_field():
-    command = input((" " * MARGIN) + "> ")
-    return command
+        if turn == 1:
+            draw_centered(README)
+            input("> ")
+            continue
+        
 
-def scene(scene: Scene):
-    clear()
+        input(cursor)
 
-    # Print the top bar
-    top_bar(scene.title)
-    time.sleep(SLOW)
-
-    # Output the content
-    for item in scene.content:
-        if callable(item):
-            item()
-            time.sleep(SLOW)
-        else:
-            print_body(item, typing=True)       
-    print()
-    time.sleep(SLOW)
-
-    # Display the options
-    for key, name, func in scene.options:
-        print_body(f"[{key}] {name}")
-        time.sleep(FAST)
-    print()
-    time.sleep(SLOW)
-
-    # Collect user input
-    command = input_field()
-    print(f"Debug - command is: '{command}'")  # The quotes will help you see any extra characters
-
-    # Find the matching option
-    for key, name, func in scene.options:
-        if command == key:
-            # Call the function and load the next scene
-            return func()
-    
-    # If we get here, the input wasn't valid.  
-    print_body("Invalid option", typing=True)
-    time.sleep(SLOW)
+if __name__ == "__main__":
+    start()
+    input("END")
