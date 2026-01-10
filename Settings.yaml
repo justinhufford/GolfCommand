@@ -1,0 +1,5 @@
+ollama_base_url: "http://localhost:11434"
+ollama_model: "mistral:7b-instruct-v0.3-q4_K_M"
+
+
+width: 36
